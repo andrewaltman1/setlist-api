@@ -6,15 +6,15 @@ import { catchAsync } from "../utils";
 router.get(
     "/songs",
     catchAsync(async (req, res) => {
-        let songs = await db.getAllSongs(req);
-        res.json(songs);
+        const {rows} = await db.getAllSongs(req);
+        res.json(rows);
     })
 );
 
 router.get(
     "/songs/author/:author",
     catchAsync(async (req, res) => {
-      let { rows } = await db.getAllSongsByAuthor(req.params.author);
+      const { rows } = await db.getAllSongsByAuthor(req.params.author);
       res.json(rows);
     })
   );
@@ -22,7 +22,7 @@ router.get(
   router.get(
     "/song/:id",
     catchAsync(async (req, res) => {
-      let { rows } = await db.getSongByID(req.params.id);
+      const { rows } = await db.getSongByID(req.params.id);
       res.json(rows);
     })
   );

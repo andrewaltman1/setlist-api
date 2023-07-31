@@ -1,15 +1,13 @@
-import 'dotenv/config'
-import express, { NextFunction, Request, Response } from 'express';
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+import express, { Request, Response } from 'express';
 import showRoutes from './routes/shows';
 import songRoutes from './routes/songs';
 import venueRoutes from './routes/venues';
 
-interface ExpressError extends Error {
-  status: number
-}
-
-
 class ExpressError extends Error {
+  status: number;
   constructor(message: string, status: number) {
     super(message);
     this.status = status
@@ -31,11 +29,6 @@ app.use((req, res, next) => {
   }
 });
 
-app.use((req, res, next) => {
-  console.log(req.method, req.query);
-  next();
-});
-
 //routes for shows
 
 app.use('/', showRoutes);
@@ -44,7 +37,7 @@ app.use('/', showRoutes);
 
 app.use('/', songRoutes);
 
-//routes for venues
+//routes for venuess
 
 app.use('/', venueRoutes);
 

@@ -9,41 +9,8 @@ export const pool = new Pool({
     port: Number(process.env.DATABASE_PORT),
 });
 
-
-class CacheGenerator {
-    dbQuery: string;
-    data: any[];
-
-    constructor(dbQuery: string) {
-        this.dbQuery = dbQuery;
-        this.data = [];
-        this.update();
-    }
-    async update() {
-        const { rows } = await pool.query(this.dbQuery);
-        this.data = rows;
-    }
-}
-
-const allShowsCache = new CacheGenerator(
-    'SELECT venues.id as "venueId", shows.id as "showId", name as "venueName", city, state, country, date, ST_AsGeoJSON(geom) AS geometry FROM venues JOIN shows ON shows.venue_id = venues.id ORDER BY date DESC'
-);
-
-const allSongsCache = new CacheGenerator(
-    `SELECT songs.id, title, author, COUNT(*) as "timesPlayed" FROM songs JOIN versions ON songs.id = versions.song_id WHERE songs.is_song = true GROUP BY songs.id ORDER BY "timesPlayed" DESC`
-);
-
-const allVenuesCache = new CacheGenerator(
-    `SELECT city, state, country, venues.id as "venueId", name as "venueName", COUNT(*) as "total", ST_AsGeoJSON(geom) AS geometry FROM venues join shows on venues.id = venue_id group by venues.id order by "total" DESC`
-);
-
 const getAllShows = async (req: Request) => {
-    if (req.url === '/new-show/confirmation' || allShowsCache.data.length === 0) {
-        await allShowsCache.update();
-        return allShowsCache.data;
-    } else {
-        return allShowsCache.data;
-    }
+    return await pool.query('SELECT venues.id as "venueId", shows.id as "showId", name as "venueName", city, state, country, date, ST_AsGeoJSON(geom) AS geometry FROM venues JOIN shows ON shows.venue_id = venues.id ORDER BY date DESC')
 };
 
 const getShowsBySongID = async (id: string) => {
@@ -68,12 +35,7 @@ const getShowByDate = async (date: string) => {
 };
 
 const getAllSongs = async (req: Request) => {
-    if (req.url === '/new-show/confirmation' || allSongsCache.data.length === 0) {
-        await allSongsCache.update();
-        return allSongsCache.data;
-    } else {
-        return allSongsCache.data;
-    }
+    return await pool.query(`SELECT songs.id, title, author, COUNT(*) as "timesPlayed" FROM songs JOIN versions ON songs.id = versions.song_id WHERE songs.is_song = true GROUP BY songs.id ORDER BY "timesPlayed" DESC`);
 };
 
 const getAllSongsByAuthor = async (author: string) => {
@@ -96,12 +58,7 @@ const getSongByID = async (id: string) => {
 };
 
 const getAllVenues = async (req: Request) => {
-    if (req.url === '/new-show/confirmation' || allVenuesCache.data.length === 0) {
-        await allVenuesCache.update();
-        return allVenuesCache.data;
-    } else {
-        return allVenuesCache.data;
-    }
+    return await pool.query(`SELECT city, state, country, venues.id as "venueId", name as "venueName", COUNT(*) as "total", ST_AsGeoJSON(geom) AS geometry FROM venues join shows on venues.id = venue_id group by venues.id order by "total" DESC`);
 };
 
 const getVenuesByState = async (state: string) => {
