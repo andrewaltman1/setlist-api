@@ -32,16 +32,16 @@ describe("The Show Routes", () => {
         expect(response.body.length).toBeGreaterThan(1000);
     });
 
-    test("GET to /show/:id returns a single show as json with status 200", async () => {
-        const response = await request(server).get("/show/1");
+    test("GET to /shows/:id returns a single show as json with status 200", async () => {
+        const response = await request(server).get("/shows/1");
         expect(response.statusCode).toBe(200);
         expect(response.type).toBe("application/json");
         expect(response.body.length).toBe(1);
     }
     );
 
-    test("GET to /show/date/:date returns a single show as json with status 200", async () => {
-        const response = await request(server).get("/show/date/2018-12-31");
+    test("GET to /shows/date/:date returns a single show as json with status 200", async () => {
+        const response = await request(server).get("/shows/date/2018-12-31");
         expect(response.statusCode).toBe(200);
         expect(response.type).toBe("application/json");
         expect(response.body[0].name).toBe('Roseland Theater');
@@ -61,16 +61,16 @@ describe("The Song Routes", () => {
         expect(response.body.length).toBeGreaterThan(200);
     });
 
-    test("GET to /songs/author/:author returns all songs by an author as json with status 200", async () => {
-        const response = await request(server).get("/songs/author/sheaffer");
+    test("GET to /songs/authors/:author returns all songs by an author as json with status 200", async () => {
+        const response = await request(server).get("/songs/authors/sheaffer");
         expect(response.statusCode).toBe(200);
         expect(response.type).toBe("application/json");
         expect(response.body.length).toBeGreaterThan(0);
     }
     );
 
-    test("GET to /song/:id returns a single song as json with status 200", async () => {
-        const response = await request(server).get("/song/1");
+    test("GET to /songs/:id returns a single song as json with status 200", async () => {
+        const response = await request(server).get("/songs/1");
         expect(response.statusCode).toBe(200);
         expect(response.type).toBe("application/json");
         expect(response.body.length).toBe(1);
@@ -90,24 +90,24 @@ describe("The Venue Routes", () => {
         expect(response.body.length).toBeGreaterThan(100);
     });
 
-    test("GET to /venues/city/:city.:state returns all venues in a city as json with status 200", async () => {
-        const response = await request(server).get("/venues/city/Boulder.CO");
+    test("GET to /venues/cities/:city.:state returns all venues in a city as json with status 200", async () => {
+        const response = await request(server).get("/venues/cities/Boulder.CO");
         expect(response.statusCode).toBe(200);
         expect(response.type).toBe("application/json");
         expect(response.body.length).toBeGreaterThan(1);
     }
     );
 
-    test("GET to /venues/state/:state returns all venues in a state as json with status 200", async () => {
-        const response = await request(server).get("/venues/state/OR");
+    test("GET to /venues/states/:state returns all venues in a state as json with status 200", async () => {
+        const response = await request(server).get("/venues/states/OR");
         expect(response.statusCode).toBe(200);
         expect(response.type).toBe("application/json");
         expect(response.body.length).toBeGreaterThan(1);
     }
     );
 
-    test("GET to /venue/:id returns all the shows for a venue as json with status 200", async () => {
-        const response = await request(server).get("/venue/1");
+    test("GET to /venues/:id returns all the shows for a venue as json with status 200", async () => {
+        const response = await request(server).get("/venues/1");
         expect(response.statusCode).toBe(200);
         expect(response.type).toBe("application/json");
         expect(response.body.length).toBeGreaterThanOrEqual(1);

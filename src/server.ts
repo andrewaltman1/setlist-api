@@ -37,9 +37,32 @@ app.use('/', showRoutes);
 
 app.use('/', songRoutes);
 
-//routes for venuess
+//routes for venues
 
 app.use('/', venueRoutes);
+
+//test sendgrid
+
+// const sgMail = require('@sendgrid/mail')
+
+// sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+
+// const msg = {
+//   to: 'andrewaltman@outlook.com', // Change to your recipient
+//   from: 'noreply@hoboscompanion.org', // Change to your verified sender
+//   subject: 'Sending with SendGrid is Fun',
+//   text: 'and easy to do anywhere, even with Node.js',
+//   html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+// }
+
+// sgMail
+//   .send(msg)
+//   .then(() => {
+//     console.log('Email sent')
+//   })
+//   .catch((error: Error) => {
+//     console.error(error)
+//   })
 
 // catch 404
 

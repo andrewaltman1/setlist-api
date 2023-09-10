@@ -12,7 +12,7 @@ router.get(
 );
 
 router.get(
-  "/venues/state/:state",
+  "/venues/states/:state",
   catchAsync(async (req, res) => {
     const { rows } = await db.getVenuesByState(req.params.state);
     res.json(rows);
@@ -20,7 +20,7 @@ router.get(
 );
 
 router.get(
-  "/venues/city/:city.:state",
+  "/venues/cities/:city.:state",
   catchAsync(async (req, res) => {
     const { rows } = await db.getVenuesByCity(req.params.city, req.params.state);
     res.json(rows)
@@ -28,7 +28,7 @@ router.get(
 );
 
 router.get(
-  "/venue/:id",
+  "/venues/:id",
   catchAsync(async (req, res) => {
     const { rows } = await db.getVenueByID(req.params.id);
     res.json(rows)

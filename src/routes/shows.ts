@@ -21,7 +21,7 @@ router.get(
 );
 
 router.get(
-    "/show/:id",
+    "/shows/:id",
     catchAsync(async (req, res) => {
         const { rows } = await db.getShowByID(req.params.id);
         res.json(rows);
@@ -29,7 +29,7 @@ router.get(
 );
 
 router.get(
-    "/show/date/:date",
+    "/shows/date/:date",
     catchAsync(async (req, res) => {
         const { rows } = await db.getShowByDate(req.params.date);
         res.json(rows);
