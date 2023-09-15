@@ -1,15 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-// const db = require('./db.js');
 import db from './db';
-// const session = require('express-session');
 import session from 'express-session';
-// const passport = require('passport');
 import passport from 'passport';
-// const LocalStrategy = require('passport-local');
-import LocalStrategy from 'passport-local';
-// const crypto = require('crypto');
+import { Strategy as LocalStrategy } from 'passport-local';
 import crypto from 'crypto';
-// const pgSession = require('connect-pg-simple')(session);
 import pgSession from 'connect-pg-simple';
 
 class User {
@@ -27,18 +21,20 @@ class User {
   }
 }
 
+const PGStore = pgSession(session);
+
 const sessionConfig = {
-  store: new pgSession({
+  store: new PGStore({
     pool: db.pool,
     tableName: 'session',
     createTableIfMissing: true,
   }),
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET as string,
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    expires: Date.now() + 1000 * 60 * 60 * 24,
+    expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
     maxAge: 1000 * 60 * 60 * 24,
   },
 };
@@ -50,7 +46,7 @@ module.exports.initialize = passport.initialize();
 module.exports.passportSession = passport.session();
 
 passport.use(
-  new LocalStrategy(function verify(username: string , password: string, cb: Function) {
+  new LocalStrategy(function verify(username: string, password: string, cb: Function) {
     db.pool.query(
       'SELECT id, email, is_admin, first_name, salt, hashed_password FROM users WHERE email = $1',
       [username],

@@ -83,6 +83,7 @@ const getVenueByID = async (id: string) => {
 };
 
 export default {
+    pool,
     getAllShows,
     getShowsBySongID,
     getShowByID,
