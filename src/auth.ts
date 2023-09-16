@@ -6,8 +6,9 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import crypto from 'crypto';
 import pgSession from 'connect-pg-simple';
 
+
 class User {
-  id: number;
+  id: number | null;
   email: string;
   firstName: string;
   attended: boolean;
@@ -46,11 +47,12 @@ module.exports.initialize = passport.initialize();
 module.exports.passportSession = passport.session();
 
 passport.use(
-  new LocalStrategy(function verify(username: string, password: string, cb: Function) {
+  new LocalStrategy((username, password, cb) => {
     db.pool.query(
       'SELECT id, email, is_admin, first_name, salt, hashed_password FROM users WHERE email = $1',
       [username],
-      function (err: Error, row: { rows: any[] }) {
+
+      (err, row) => {
         if (err) {
           return cb(err);
         }
@@ -66,7 +68,7 @@ passport.use(
           310000,
           32,
           'sha256',
-          function (err, hashedPassword) {
+          (err, hashedPassword) => {
             if (err) {
               return cb(err);
             }
@@ -80,7 +82,7 @@ passport.use(
                 message: 'Incorrect email/password',
               });
             }
-            let user = new User(row.rows[0]);
+            const user = new User(row.rows[0]);
             return cb(null, user);
           }
         );
@@ -97,19 +99,19 @@ module.exports.crypto = (req: Request, res: Response, next: NextFunction) => {
     310000,
     32,
     'sha256',
-    function (err, hashedPassword) {
+    (err, hashedPassword) => {
       if (err) {
         return next(err);
       }
       db.pool.query(
         'INSERT INTO users (email, hashed_password, salt, encrypted_password, created_at, updated_at) VALUES ($1, $2, $3, $4, LOCALTIMESTAMP, LOCALTIMESTAMP)',
         [req.body.username, hashedPassword, salt, 'see hashed column'],
-        function (err: Error) {
+        (err: Error) => {
           if (err) {
             return next(err);
           }
-          let user = new User(req.body);
-          req.login(user, function (err) {
+          const user = new User(req.body);
+          req.login(user, (err) => {
             if (err) {
               return next(err);
             }
@@ -123,19 +125,19 @@ module.exports.crypto = (req: Request, res: Response, next: NextFunction) => {
 
 module.exports.authenticate = passport.authenticate('session');
 
-passport.serializeUser(function (user, cb) {
-  process.nextTick(function () {
+passport.serializeUser((user, cb) => {
+  process.nextTick(() => {
     cb(null, {
-      id: user.id,
-      email: user.email,
-      admin: user.admin,
-      firstName: user.firstName,
+      id: (user as User).id,
+      email: (user as User).email,
+      admin: (user as User).admin,
+      firstName: (user as User).firstName,
     });
   });
 });
 
-passport.deserializeUser(function (user, cb) {
-  process.nextTick(function () {
+passport.deserializeUser((user, cb) => {
+  process.nextTick(() => {
     return cb(null, user);
   });
 });
