@@ -107,7 +107,7 @@ describe("The Venue Routes", () => {
     );
 
     test("GET to /venues/:id returns all the shows for a venue as json with status 200", async () => {
-        const response = await request(server).get("/venues/1");
+        const response = await request(server).get("/venues/2");
         expect(response.statusCode).toBe(200);
         expect(response.type).toBe("application/json");
         expect(response.body.length).toBeGreaterThanOrEqual(1);
