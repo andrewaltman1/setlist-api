@@ -44,7 +44,7 @@ describe("The Show Routes", () => {
         const response = await request(server).get("/shows/date/2018-12-31");
         expect(response.statusCode).toBe(200);
         expect(response.type).toBe("application/json");
-        expect(response.body[0].name).toBe('Roseland Theater');
+        expect(response.body[0].venueName).toBe('Roseland Theater');
     }
     );
 

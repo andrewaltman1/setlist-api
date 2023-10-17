@@ -22,14 +22,15 @@ const getShowsBySongID = async (id: string) => {
 
 const getShowByID = async (id: string) => {
     return await pool.query(
-        `SELECT name, city, state, country, date, ST_AsGeoJSON(geom) AS geometry, show_notes as "showNotes", title, position, set_number as "setNumber", version_notes as "versionNotes", transition FROM shows JOIN venues ON venues.id = shows.venue_id JOIN versions ON shows.id = show_id JOIN songs ON songs.id = song_id WHERE shows.id = $1 ORDER BY position`,
+        `SELECT shows.id, name as "venueName", city, state, country, date, ST_AsGeoJSON(geom) AS geometry, show_notes as "showNotes", array_agg(json_build_object('id', songs.id, 'title', title, 'position', position, 'setNumber', set_number, 'versionNotes', version_notes, 'transition', transition) ORDER BY position) as songs  FROM shows JOIN venues ON venues.id = shows.venue_id JOIN versions ON shows.id = show_id JOIN songs ON songs.id = song_id WHERE shows.id = $1 GROUP BY venues.name, venues,city, venues.state, venues.geom, venues.country, shows.date, shows.show_notes, shows.id`,
         [id]
     );
 };
 
 const getShowByDate = async (date: string) => {
     return await pool.query(
-        `SELECT name, city, state, country, date, ST_AsGeoJSON(geom) AS geometry, show_notes as "showNotes", title, position, set_number as "setNumber", version_notes as "versionNotes", transition FROM shows JOIN venues ON venues.id = shows.venue_id JOIN versions ON shows.id = show_id JOIN songs ON songs.id = song_id WHERE shows.date = $1 ORDER BY position`,
+        `SELECT shows.id, name as "venueName", city, state, country, date, ST_AsGeoJSON(geom) AS geometry, show_notes as "showNotes", array_agg(json_build_object('id', songs.id, 'title', title, 'position', position, 'setNumber', set_number, 'versionNotes', version_notes, 'transition', transition) ORDER BY position) as songs FROM shows JOIN venues ON venues.id = shows.venue_id JOIN versions ON shows.id = show_id JOIN songs ON songs.id = song_id WHERE shows.date = $1 GROUP BY venues.name, venues.city, venues.state, venues.country, venues.geom, shows.id, shows.date
+        `,
         [date]
     );
 };
@@ -58,26 +59,26 @@ const getSongByID = async (id: string) => {
 };
 
 const getAllVenues = async (req: Request) => {
-    return await pool.query(`SELECT city, state, country, venues.id as "venueId", name as "venueName", COUNT(*) as "total", ST_AsGeoJSON(geom) AS geometry FROM venues join shows on venues.id = venue_id group by venues.id order by "total" DESC`);
+    return await pool.query(`SELECT venues.id as "venueId", name as "venueName", city, state, country, ST_AsGeoJSON(geom) AS geometry, COUNT(*) as "total" FROM venues join shows on venues.id = venue_id group by venues.id order by "total" DESC`);
 };
 
 const getVenuesByState = async (state: string) => {
     return await pool.query(
-        `SELECT city, state, country, venues.id as "venueId", name as "venueName", COUNT(*) as "total", ST_AsGeoJSON(geom) AS geometry, (SELECT AVG(ST_X(geom)) AS "centerLng" FROM venues where state = $1 or country = $1), (SELECT AVG(ST_Y(geom)) AS "centerLat" FROM venues where state = $1 or country = $1) FROM venues join shows on venues.id = venue_id where state = $1 or country = $1 group by venues.id order by "total" DESC`,
+        `SELECT venues.id as "venueId", name as "venueName", city, state, country, ST_AsGeoJSON(geom) AS geometry, (SELECT AVG(ST_X(geom)) AS "centerLng" FROM venues where state = $1 or country = $1), (SELECT AVG(ST_Y(geom)) AS "centerLat" FROM venues where state = $1 or country = $1), COUNT(*) as "total" FROM venues join shows on venues.id = venue_id where state = $1 or country = $1 group by venues.id order by "total" DESC`,
         [state]
     );
 };
 
 const getVenuesByCity = async (city: string, state: string) => {
     return await pool.query(
-        `SELECT city, state, country, venues.id as "venueId", name as "venueName", COUNT(*) as total, ST_AsGeoJSON(geom) AS geometry, (SELECT AVG(ST_X(geom)) AS "centerLng" FROM venues where city = $1 AND state = $2 OR country = $2), (SELECT AVG(ST_Y(geom)) AS "centerLat" FROM venues where city = $1 AND state = $2 OR country = $2), MAX(date) as "mostRecent" FROM venues join shows on venues.id = venue_id where city = $1 AND state = $2 OR country = $2 group by venues.id ORDER BY "total" DESC`,
+        `SELECT venues.id as "venueId", name as "venueName", city, state, country, ST_AsGeoJSON(geom) AS geometry, (SELECT AVG(ST_X(geom)) AS "centerLng" FROM venues where city = $1 AND state = $2 OR country = $2), (SELECT AVG(ST_Y(geom)) AS "centerLat" FROM venues where city = $1 AND state = $2 OR country = $2), MAX(date) as "mostRecent", COUNT(*) as total FROM venues join shows on venues.id = venue_id where city = $1 AND state = $2 OR country = $2 group by venues.id ORDER BY "total" DESC`,
         [city, state]
     );
 };
 
 const getVenueByID = async (id: string) => {
     return await pool.query(
-        `SELECT venues.id AS "venueId", shows.id AS "showId", name, city, state, country, ST_AsGeoJSON(geom) AS geometry, date FROM venues JOIN shows ON venues.id = shows.venue_id WHERE venues.id = $1 ORDER BY date`,
+        `SELECT venues.id AS "venueId", name as "venueName", city, state, country, ST_AsGeoJSON(geom) AS geometry, array_agg(json_build_object('showID', shows.id, 'date', date) ORDER BY date DESC) as shows FROM venues JOIN shows ON venues.id = shows.venue_id WHERE venues.id = $1 GROUP BY venues.id, venues.name, venues.city, venues.state, venues.country, venues.geom`,
         [id]
     );
 };
