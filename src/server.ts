@@ -1,10 +1,7 @@
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-}
-import express, { Request, Response } from 'express';
-import showRoutes from './routes/shows';
-import songRoutes from './routes/songs';
-import venueRoutes from './routes/venues';
+import express, { type Request, type Response, type NextFunction } from 'express';
+import showRoutes from './routes/shows.ts';
+import songRoutes from './routes/songs.ts';
+import venueRoutes from './routes/venues.ts';
 
 class ExpressError extends Error {
   status: number;
@@ -73,9 +70,9 @@ app.use('*', (req, res, next) => {
 
 // global error handler
 
-app.use((err: ExpressError, req: Request, res: Response) => {
-  console.log(err.status);
-  res.status(err.status).json(err.message);
+app.use((err: ExpressError, _req: Request, res: Response, _next: NextFunction) => {
+  const status = err.status || 500;
+  res.status(status).json({ error: err.message });
 });
 
 // server port

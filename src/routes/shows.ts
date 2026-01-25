@@ -1,7 +1,7 @@
-import express, { Request, Response } from "express";
+import express from "express";
 const router = express.Router();
-import db from "../db";
-import { catchAsync } from "../utils";
+import db from "../db.ts";
+import { catchAsync } from "../utils.ts";
 
 router.get(
     "/shows",

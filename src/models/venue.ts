@@ -1,5 +1,12 @@
 class Venue {
-  constructor(venue, shows) {
+  name: string | null;
+  city: string | null;
+  state: string | null;
+  country: string | null;
+  geometry: any;
+  shows: Array<{ id: number; date: string }>;
+
+  constructor(venue: any, shows?: any) {
     (this.name = venue.name || null),
       (this.city = venue.city || null),
       (this.state = venue.state || null),
@@ -8,7 +15,7 @@ class Venue {
       (this.shows = !shows ? [] : this.showFormatter(shows));
   }
 
-  showFormatter(arr) {
+  showFormatter(arr: any[]) {
     return arr.map((el) => {
       return {
         id: el.showId,
@@ -18,4 +25,4 @@ class Venue {
   }
 }
 
-module.exports = Venue;
+export default Venue;

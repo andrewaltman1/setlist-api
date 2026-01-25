@@ -1,5 +1,14 @@
 class Song {
-  constructor(data) {
+  id: number | null;
+  title: string | null;
+  author: string | null;
+  notes: string | null;
+  instrumental: boolean | null;
+  timesPlayed: number | null;
+  firstTimePlayed: string | null;
+  mostRecent: string | null;
+
+  constructor(data: any) {
     (this.id = data.id || null),
       (this.title = data.title || null),
       (this.author = data.author || null),
@@ -11,4 +20,4 @@ class Song {
   }
 }
 
-module.exports = Song;
+export default Song;

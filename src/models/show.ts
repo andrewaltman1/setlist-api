@@ -1,15 +1,31 @@
-const Venue = require("../models/venue");
+import Venue from "./venue.ts";
+
+interface SongData {
+  title: string;
+  position: number;
+  setNumber: string | number;
+  versionNotes: string | null;
+  transition: boolean;
+}
+
+interface FormattedSong {
+  title: string;
+  position: number;
+  setNumber: string | number;
+  versionNotes: string | null;
+  transition: boolean;
+}
 
 class Show {
   date: string | null;
   venue: Venue;
   notes: string;
-  setCount: number;
-  didEncore: boolean;
-  songs: Array<object>;
-  sets: object;
+  setCount: number | null;
+  didEncore: boolean | null;
+  songs: Array<FormattedSong>;
+  sets: Record<string | number, FormattedSong[]>;
 
-  constructor(date: string, venue, songs, notes) {
+  constructor(date: string, venue: any, songs: SongData[], notes: any) {
     (this.date = new Date(date).toLocaleDateString('en-US', {timeZone: 'UTC'}) || null),
       (this.venue = new Venue(venue) || null),
       (this.notes = notes || null),
@@ -22,10 +38,10 @@ class Show {
       (this.didEncore =
         songs.some((song) => song.setNumber == "Encore") || null),
       (this.songs = this.songFormatter(songs) || []),
-      (this.sets = this.sortSets() || []);
+      (this.sets = this.sortSets() || {});
   }
 
-  songFormatter(arr) {
+  songFormatter(arr: SongData[]) {
     return arr.map((el) => {
       return {
         title: el.title + `${el.transition ? " >" : ""}`,
@@ -37,8 +53,8 @@ class Show {
     });
   }
 
-  sortSets() {
-    return this.songs.reduce(function (r, a) {
+  sortSets(): Record<string | number, FormattedSong[]> {
+    return this.songs.reduce(function (r: Record<string | number, FormattedSong[]>, a) {
       r[a.setNumber] = r[a.setNumber] || [];
       r[a.setNumber].push(a);
       return r;
@@ -46,42 +62,4 @@ class Show {
   }
 }
 
-// class Show {
-//   constructor(date, venue, songs, notes) {
-//     (this.date = date.toLocaleDateString() || null),
-//       (this.venue = new Venue(venue) || null),
-//       (this.notes = notes || null),
-//       (this.setCount =
-//         Math.max(
-//           ...songs
-//             .filter((song) => song.setNumber != "Encore")
-//             .map((el) => +el.setNumber)
-//         ) || null),
-//       (this.didEncore =
-//         songs.some((song) => song.setNumber == "Encore") || null),
-//       (this.songs = this.songFormatter(songs) || []),
-//       (this.sets = this.sortSets() || []);
-//   }
-
-//   songFormatter(arr) {
-//     return arr.map((el) => {
-//       return {
-//         title: el.title + `${el.transition ? " >" : ""}`,
-//         position: el.position,
-//         setNumber: el.setNumber,
-//         versionNotes: el.versionNotes,
-//         transition: el.transition,
-//       };
-//     });
-//   }
-
-//   sortSets() {
-//     return this.songs.reduce(function (r, a) {
-//       r[a.setNumber] = r[a.setNumber] || [];
-//       r[a.setNumber].push(a);
-//       return r;
-//     }, Object.create(null));
-//   }
-// }
-
-module.exports = Show;
+export default Show;

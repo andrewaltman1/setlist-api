@@ -1,9 +1,28 @@
+interface Feature {
+  type: "Feature";
+  properties: {
+    venueId: number | null;
+    venue: string | null;
+    city: string | null;
+    state: string | null;
+    country: string | null;
+    date: string | null;
+    showId: number | null;
+    total: number | null;
+    mostRecent: string | null;
+  };
+  geometry: any;
+}
+
 class FeatureCollection {
-  constructor(features) {
+  type: "FeatureCollection";
+  features: Feature[];
+
+  constructor(features: any[]) {
     (this.type = "FeatureCollection"),
       (this.features = features.map((feature) => {
         return {
-          type: "Feature",
+          type: "Feature" as const,
           properties: {
             venueId: +feature.venueId || null,
             venue: feature.venueName || null,
@@ -23,4 +42,4 @@ class FeatureCollection {
   }
 }
 
-module.exports = FeatureCollection;
+export default FeatureCollection;

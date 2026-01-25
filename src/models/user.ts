@@ -1,5 +1,12 @@
 class User {
-  constructor(data) {
+  id: number | null;
+  email: string;
+  firstName: string;
+  attended: boolean;
+  admin: boolean;
+  editor: boolean;
+
+  constructor(data: any) {
     (this.id = data.id || null),
       (this.email = data.email),
       (this.firstName = data.first_name || data.email),
@@ -9,4 +16,4 @@ class User {
   }
 }
 
-module.exports = User;
+export default User;

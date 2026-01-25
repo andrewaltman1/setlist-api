@@ -1,8 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
-import db from './db';
+import type { Request, Response, NextFunction } from 'express';
+import db from './db.ts';
 import session from 'express-session';
 import passport from 'passport';
-import { Strategy as LocalStrategy } from 'passport-local';
+import passportLocal from 'passport-local';
+const { Strategy: LocalStrategy } = passportLocal;
 import crypto from 'crypto';
 import pgSession from 'connect-pg-simple';
 
@@ -14,11 +15,11 @@ class User {
   attended: boolean;
   admin: boolean;
   constructor(user: { id: number, email: string, first_name: string, attended: boolean, is_admin: boolean }) {
-    (this.id = user.id || null),
-      (this.email = user.email),
-      (this.firstName = user.first_name || user.email),
-      (this.attended = user.attended || false),
-      (this.admin = user.is_admin || false),
+    this.id = user.id || null;
+    this.email = user.email;
+    this.firstName = user.first_name || user.email;
+    this.attended = user.attended || false;
+    this.admin = user.is_admin || false;
   }
 }
 
@@ -40,11 +41,11 @@ const sessionConfig = {
   },
 };
 
-module.exports.passport = passport;
+export { passport };
 
-module.exports.expressSession = session(sessionConfig);
-module.exports.initialize = passport.initialize();
-module.exports.passportSession = passport.session();
+export const expressSession = session(sessionConfig);
+export const initialize = passport.initialize();
+export const passportSession = passport.session();
 
 passport.use(
   new LocalStrategy((username, password, cb) => {
@@ -91,7 +92,7 @@ passport.use(
   })
 );
 
-module.exports.crypto = (req: Request, res: Response, next: NextFunction) => {
+export const cryptoMiddleware = (req: Request, res: Response, next: NextFunction) => {
   let salt = crypto.randomBytes(16);
   crypto.pbkdf2(
     req.body.password,
@@ -123,7 +124,7 @@ module.exports.crypto = (req: Request, res: Response, next: NextFunction) => {
   );
 };
 
-module.exports.authenticate = passport.authenticate('session');
+export const authenticate = passport.authenticate('session');
 
 passport.serializeUser((user, cb) => {
   process.nextTick(() => {
@@ -136,7 +137,7 @@ passport.serializeUser((user, cb) => {
   });
 });
 
-passport.deserializeUser((user, cb) => {
+passport.deserializeUser((user: Express.User, cb) => {
   process.nextTick(() => {
     return cb(null, user);
   });

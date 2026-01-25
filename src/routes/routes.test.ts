@@ -1,7 +1,6 @@
-import { Server } from "http";
 import request from "supertest";
-import server from "../server";
-import { pool } from "../db";
+import server from "../server.ts";
+import { pool } from "../db.ts";
 
 //before all the tests, set up and tear down both the server and database
 
