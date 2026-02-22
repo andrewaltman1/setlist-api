@@ -1,5 +1,7 @@
 import { Model, DataTypes } from 'sequelize';
-import type { Sequelize, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
+import type { Sequelize, InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from 'sequelize';
+import type { Version } from './Version.ts';
+import type { Show } from './Show.ts';
 
 export class Song extends Model<InferAttributes<Song>, InferCreationAttributes<Song>> {
   declare id: CreationOptional<number>;
@@ -17,8 +19,8 @@ export class Song extends Model<InferAttributes<Song>, InferCreationAttributes<S
   declare updatedAt: CreationOptional<Date>;
 
   // Associations
-  declare versions?: any[];
-  declare shows?: any[];
+  declare versions?: NonAttribute<Version[]>;
+  declare shows?: NonAttribute<Show[]>;
 
   // Virtual fields from aggregation
   declare timesPlayed?: number;

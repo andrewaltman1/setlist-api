@@ -1,29 +1,25 @@
 import { Op } from 'sequelize';
+import type { Order } from 'sequelize';
+import { z } from 'zod';
 import { sequelize, Venue, Show } from '../models/index.ts';
 import { NotFoundError } from '../utils/errors.ts';
 import { decodeCursor, buildPaginatedResponse } from '../utils/pagination.ts';
+import { listVenuesQuery, createVenueBody } from '../routes/v1/venues.ts';
 
-interface ListVenuesParams {
-  cursor?: string;
-  limit?: number;
-  sortBy?: string;
-  direction?: string;
-  state?: string;
-  city?: string;
-  country?: string;
-}
+type ListVenuesParams = z.infer<typeof listVenuesQuery>;
 
 export async function listVenues(params: ListVenuesParams) {
   const {
     cursor,
-    limit = 25,
-    sortBy = 'name',
-    direction = 'desc',
+    limit,
+    sortBy,
+    direction,
     state,
     city,
     country,
   } = params;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic Op.and accumulation is incompatible with WhereOptions
   const where: any = {};
 
   if (state) {
@@ -62,7 +58,7 @@ export async function listVenues(params: ListVenuesParams) {
   }
 
   // Determine sort order
-  let order: any[];
+  let order: Order;
   if (sortBy === 'total') {
     order = [[sequelize.literal('"totalShows"'), direction], ['id', direction]];
   } else if (sortBy === 'city') {
@@ -93,9 +89,9 @@ export async function listVenues(params: ListVenuesParams) {
     subQuery: false,
   });
 
-  const totalItems = typeof count === 'number' ? count : (count as any[]).length;
+  const totalItems = typeof count === 'number' ? count : (count as { count: number }[]).length;
 
-  const formatted = rows.map((venue: any) => ({
+  const formatted = rows.map((venue) => ({
     id: venue.id,
     name: venue.name,
     city: venue.city,
@@ -110,7 +106,7 @@ export async function listVenues(params: ListVenuesParams) {
     totalItems,
     limit,
     sortKey: sortBy === 'total' ? 'totalShows' : (sortBy === 'city' ? 'city' : sortBy === 'state' ? 'state' : 'name'),
-    direction: direction as 'asc' | 'desc',
+    direction,
   });
 }
 
@@ -131,7 +127,7 @@ export async function getVenue(id: number) {
     throw new NotFoundError('Venue not found');
   }
 
-  const shows = (venue.shows || []).map((show: any) => ({
+  const shows = (venue.shows || []).map((show) => ({
     id: show.id,
     date: show.date,
   }));
@@ -148,12 +144,7 @@ export async function getVenue(id: number) {
   };
 }
 
-interface CreateVenuePayload {
-  name: string;
-  city: string;
-  state: string;
-  country: string;
-}
+type CreateVenuePayload = z.infer<typeof createVenueBody>;
 
 export async function createVenue(payload: CreateVenuePayload, userId: number) {
   const venue = await Venue.create({

@@ -1,7 +1,13 @@
 import { Op } from 'sequelize';
+import type { Includeable, IncludeOptions, Order } from 'sequelize';
+import { z } from 'zod';
 import { sequelize, Show, Venue, Version, Song } from '../models/index.ts';
 import { NotFoundError, ValidationError } from '../utils/errors.ts';
 import { decodeCursor, buildPaginatedResponse } from '../utils/pagination.ts';
+import { listShowsQuery, createShowBody } from '../routes/v1/shows.ts';
+
+type ListShowsParams = z.infer<typeof listShowsQuery>;
+type CreateShowPayload = z.infer<typeof createShowBody>;
 
 function mapSetNumber(raw: string): string {
   if (raw === 'Encore') return 'E';
@@ -11,34 +17,24 @@ function mapSetNumber(raw: string): string {
   return raw; // '1', '2', '3' stay as-is
 }
 
-interface ListShowsParams {
-  cursor?: string;
-  limit?: number;
-  sortBy?: string;
-  direction?: string;
-  songId?: number;
-  venueId?: number;
-  year?: number;
-  state?: string;
-}
-
 export async function listShows(params: ListShowsParams) {
   const {
     cursor,
-    limit = 25,
-    sortBy = 'date',
-    direction = 'desc',
+    limit,
+    sortBy,
+    direction,
     songId,
     venueId,
     year,
     state,
   } = params;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic Op.and accumulation is incompatible with WhereOptions
   const where: any = {};
-  const includeArray: any[] = [];
+  const includeArray: Includeable[] = [];
 
   // Always include Venue
-  const venueInclude: any = {
+  const venueInclude: IncludeOptions = {
     model: Venue,
     as: 'venue',
     attributes: ['id', 'name', 'city', 'state', 'country', 'geom'],
@@ -90,7 +86,7 @@ export async function listShows(params: ListShowsParams) {
   }
 
   // Determine sort order
-  let order: any[];
+  let order: Order;
   if (sortBy === 'venue') {
     order = [[{ model: Venue, as: 'venue' }, 'name', direction], ['id', direction]];
   } else {
@@ -106,9 +102,9 @@ export async function listShows(params: ListShowsParams) {
     subQuery: false,
   });
 
-  const totalItems = typeof count === 'number' ? count : (count as any[]).length;
+  const totalItems = typeof count === 'number' ? count : (count as { count: number }[]).length;
 
-  const formatted = rows.map((show: any) => ({
+  const formatted = rows.map((show) => ({
     id: show.id,
     date: show.date,
     venue: show.venue ? {
@@ -127,7 +123,7 @@ export async function listShows(params: ListShowsParams) {
     totalItems,
     limit,
     sortKey: sortBy === 'date' ? 'date' : 'date',
-    direction: direction as 'asc' | 'desc',
+    direction,
   });
 }
 
@@ -160,7 +156,14 @@ export async function getShow(id: number) {
   }
 
   // Group versions into sets
-  const sets: Record<string, any[]> = {};
+  const sets: Record<string, {
+    songId: number | undefined;
+    title: string | null | undefined;
+    position: number | null;
+    setNumber: string;
+    transition: boolean | null;
+    versionNotes: string | null;
+  }[]> = {};
   const numericSets = new Set<number>();
   let didEncore = false;
 
@@ -209,19 +212,6 @@ export async function getShow(id: number) {
   };
 }
 
-interface CreateShowPayload {
-  date: string;
-  venueId: number;
-  notes?: string | null;
-  songs: Array<{
-    songId: number;
-    position: number;
-    setNumber: string;
-    transition?: boolean;
-    versionNotes?: string | null;
-  }>;
-}
-
 export async function createShow(payload: CreateShowPayload, userId: number) {
   const result = await sequelize.transaction(async (t) => {
     // Verify venue exists
@@ -248,7 +238,7 @@ export async function createShow(payload: CreateShowPayload, userId: number) {
         songId: s.songId,
         position: s.position,
         setNumber: s.setNumber,
-        transition: s.transition || false,
+        transition: s.transition,
         versionNotes: s.versionNotes || null,
         createdBy: userId,
       })),

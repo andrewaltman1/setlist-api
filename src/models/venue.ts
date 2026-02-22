@@ -1,5 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
-import type { Sequelize, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
+import type { Sequelize, InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from 'sequelize';
+import type { Show } from './Show.ts';
 
 export class Venue extends Model<InferAttributes<Venue>, InferCreationAttributes<Venue>> {
   declare id: CreationOptional<number>;
@@ -9,13 +10,13 @@ export class Venue extends Model<InferAttributes<Venue>, InferCreationAttributes
   declare country: CreationOptional<string>;
   declare updatedBy: number | null;
   declare createdBy: number | null;
-  declare geom: any | null;
+  declare geom: object | null;
   declare createdByUserName: string | null;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 
   // Associations
-  declare shows?: any[];
+  declare shows?: NonAttribute<Show[]>;
 
   // Virtual fields from aggregation
   declare totalShows?: number;

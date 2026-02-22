@@ -34,7 +34,7 @@ export async function getStats() {
     mostRecentShow: mostRecentShow ? {
       id: mostRecentShow.id,
       date: mostRecentShow.date,
-      venueName: (mostRecentShow as any).venue?.name || null,
+      venueName: mostRecentShow.venue?.name || null,
     } : null,
   };
 }

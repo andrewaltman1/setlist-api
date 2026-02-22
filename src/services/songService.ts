@@ -1,25 +1,23 @@
-import { Op } from 'sequelize';
+import { Op, QueryTypes } from 'sequelize';
+import type { Order } from 'sequelize';
+import { z } from 'zod';
 import { sequelize, Song, Version, Show, Venue } from '../models/index.ts';
 import { NotFoundError } from '../utils/errors.ts';
 import { decodeCursor, buildPaginatedResponse } from '../utils/pagination.ts';
+import { listSongsQuery } from '../routes/v1/songs.ts';
 
-interface ListSongsParams {
-  cursor?: string;
-  limit?: number;
-  sortBy?: string;
-  direction?: string;
-  author?: string;
-}
+type ListSongsParams = z.infer<typeof listSongsQuery>;
 
 export async function listSongs(params: ListSongsParams) {
   const {
     cursor,
-    limit = 25,
-    sortBy = 'title',
-    direction = 'desc',
+    limit,
+    sortBy,
+    direction,
     author,
   } = params;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic Op.and accumulation is incompatible with WhereOptions
   const where: any = {
     isSong: true,
     deleted: false,
@@ -51,7 +49,7 @@ export async function listSongs(params: ListSongsParams) {
   }
 
   // Determine sort order
-  let order: any[];
+  let order: Order;
   if (sortBy === 'author') {
     order = [['author', direction], ['id', direction]];
   } else if (sortBy === 'timesPlayed') {
@@ -80,9 +78,9 @@ export async function listSongs(params: ListSongsParams) {
     subQuery: false,
   });
 
-  const totalItems = typeof count === 'number' ? count : (count as any[]).length;
+  const totalItems = typeof count === 'number' ? count : (count as { count: number }[]).length;
 
-  const formatted = rows.map((song: any) => ({
+  const formatted = rows.map((song) => ({
     id: song.id,
     title: song.title,
     author: song.author,
@@ -94,7 +92,7 @@ export async function listSongs(params: ListSongsParams) {
     totalItems,
     limit,
     sortKey: sortBy === 'author' ? 'author' : 'title',
-    direction: direction as 'asc' | 'desc',
+    direction,
   });
 }
 
@@ -125,14 +123,14 @@ export async function getSong(id: number) {
 
   // Extract show dates for computing first/last played
   const showDates = versions
-    .filter((v: any) => v.show?.date)
-    .map((v: any) => ({ date: v.show.date, showId: v.show.id, venueName: v.show.venue?.name }))
-    .sort((a: any, b: any) => b.date.localeCompare(a.date));
+    .filter((v) => v.show?.date)
+    .map((v) => ({ date: v.show!.date!, showId: v.show!.id, venueName: v.show!.venue?.name }))
+    .sort((a, b) => b.date.localeCompare(a.date));
 
   const firstPlayed = showDates.length > 0 ? showDates[showDates.length - 1].date : null;
   const lastPlayed = showDates.length > 0 ? showDates[0].date : null;
 
-  const shows = showDates.map((s: any) => ({
+  const shows = showDates.map((s) => ({
     showId: s.showId,
     date: s.date,
     venueName: s.venueName,
@@ -165,9 +163,9 @@ export async function lookupSongs(titles: string[]) {
        LIMIT 1`,
       {
         bind: [inputTitle],
-        type: 'SELECT' as any,
+        type: QueryTypes.SELECT,
       },
-    ) as any[];
+    ) as { id: number; title: string; confidence: string }[];
 
     if (results.length > 0) {
       const match = results[0];

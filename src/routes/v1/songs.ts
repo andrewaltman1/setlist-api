@@ -6,7 +6,7 @@ import { z } from 'zod';
 const router = Router();
 
 // Validation schemas
-const listSongsQuery = z.object({
+export const listSongsQuery = z.object({
   cursor: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(100).default(25),
   sortBy: z.enum(['title', 'author', 'timesPlayed']).default('title'),

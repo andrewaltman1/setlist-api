@@ -1,5 +1,8 @@
 import { Model, DataTypes } from 'sequelize';
-import type { Sequelize, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
+import type { Sequelize, InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from 'sequelize';
+import type { Venue } from './Venue.ts';
+import type { Version } from './Version.ts';
+import type { Song } from './Song.ts';
 
 export class Show extends Model<InferAttributes<Show>, InferCreationAttributes<Show>> {
   declare id: CreationOptional<number>;
@@ -16,9 +19,9 @@ export class Show extends Model<InferAttributes<Show>, InferCreationAttributes<S
   declare updatedAt: CreationOptional<Date>;
 
   // Associations (populated by includes)
-  declare venue?: any;
-  declare versions?: any[];
-  declare songs?: any[];
+  declare venue?: NonAttribute<Venue>;
+  declare versions?: NonAttribute<Version[]>;
+  declare songs?: NonAttribute<Song[]>;
 }
 
 export function initShow(sequelize: Sequelize): typeof Show {

@@ -6,7 +6,7 @@ import { z } from 'zod';
 const router = Router();
 
 // Validation schemas
-const listVenuesQuery = z.object({
+export const listVenuesQuery = z.object({
   cursor: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(100).default(25),
   sortBy: z.enum(['name', 'city', 'state', 'total']).default('name'),
@@ -20,7 +20,7 @@ const venueIdParam = z.object({
   venueId: z.coerce.number().int(),
 });
 
-const createVenueBody = z.object({
+export const createVenueBody = z.object({
   name: z.string(),
   city: z.string(),
   state: z.string(),

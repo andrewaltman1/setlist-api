@@ -1,5 +1,7 @@
 import { Model, DataTypes } from 'sequelize';
-import type { Sequelize, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
+import type { Sequelize, InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from 'sequelize';
+import type { Show } from './Show.ts';
+import type { Song } from './Song.ts';
 
 export class Version extends Model<InferAttributes<Version>, InferCreationAttributes<Version>> {
   declare id: CreationOptional<number>;
@@ -16,8 +18,8 @@ export class Version extends Model<InferAttributes<Version>, InferCreationAttrib
   declare updatedAt: CreationOptional<Date>;
 
   // Associations
-  declare show?: any;
-  declare song?: any;
+  declare show?: NonAttribute<Show>;
+  declare song?: NonAttribute<Song>;
 }
 
 export function initVersion(sequelize: Sequelize): typeof Version {
