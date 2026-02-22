@@ -2,10 +2,18 @@
 export default {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
-  testMatch: ['**/*.test.ts'],
+  testMatch: ['**/tests/**/*.test.ts'],
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
     '^(\\.{1,2}/.*)\\.ts$': '$1',
   },
-  transform: {},
+  transform: {
+    '^.+\\.ts$': ['ts-jest', {
+      useESM: true,
+      tsconfig: {
+        rootDir: '.',
+        verbatimModuleSyntax: false,
+        isolatedModules: true,
+      },
+    }],
+  },
 };

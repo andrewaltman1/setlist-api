@@ -1,64 +1,63 @@
 import { Model, DataTypes } from 'sequelize';
 import type { Sequelize, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 
-export class Show extends Model<InferAttributes<Show>, InferCreationAttributes<Show>> {
+export class Version extends Model<InferAttributes<Version>, InferCreationAttributes<Version>> {
   declare id: CreationOptional<number>;
-  declare date: string | null;
-  declare venueId: number | null;
-  declare showNotes: string | null;
-  declare verified: CreationOptional<boolean>;
-  declare updatedBy: number | null;
-  declare archiveInfo: string | null;
+  declare showId: number | null;
+  declare position: number | null;
+  declare setNumber: CreationOptional<string>;
+  declare songId: number | null;
+  declare transition: boolean | null;
+  declare versionNotes: string | null;
   declare createdBy: number | null;
-  declare slug: string | null;
+  declare updatedBy: number | null;
   declare createdByUserName: string | null;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 
-  // Associations (populated by includes)
-  declare venue?: any;
-  declare versions?: any[];
-  declare songs?: any[];
+  // Associations
+  declare show?: any;
+  declare song?: any;
 }
 
-export function initShow(sequelize: Sequelize): typeof Show {
-  Show.init(
+export function initVersion(sequelize: Sequelize): typeof Version {
+  Version.init(
     {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
       },
-      date: {
-        type: DataTypes.DATEONLY,
-        allowNull: true,
-      },
-      venueId: {
+      showId: {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
-      showNotes: {
-        type: DataTypes.STRING(4000),
+      position: {
+        type: DataTypes.INTEGER,
         allowNull: true,
       },
-      verified: {
+      setNumber: {
+        type: DataTypes.STRING(255),
+        defaultValue: '1',
+      },
+      songId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      transition: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false,
-      },
-      updatedBy: {
-        type: DataTypes.INTEGER,
         allowNull: true,
       },
-      archiveInfo: {
-        type: DataTypes.TEXT,
+      versionNotes: {
+        type: DataTypes.STRING(500),
         allowNull: true,
       },
       createdBy: {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
-      slug: {
-        type: DataTypes.STRING(255),
+      updatedBy: {
+        type: DataTypes.INTEGER,
         allowNull: true,
       },
       createdByUserName: {
@@ -70,10 +69,10 @@ export function initShow(sequelize: Sequelize): typeof Show {
     },
     {
       sequelize,
-      tableName: 'shows',
+      tableName: 'versions',
       underscored: true,
       timestamps: true,
     },
   );
-  return Show;
+  return Version;
 }
