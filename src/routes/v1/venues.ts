@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { requireAuth } from '../../middleware/auth.ts';
-import { validateRequest } from '../../middleware/validateRequest.ts';
 import * as venueService from '../../services/venueService.ts';
 import { z } from 'zod';
 
@@ -29,23 +28,26 @@ const createVenueBody = z.object({
 });
 
 // Routes
-router.get('/', validateRequest({ query: listVenuesQuery }), async (req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
-    const result = await venueService.listVenues(req.query as any);
+    const query = listVenuesQuery.parse(req.query);
+    const result = await venueService.listVenues(query);
     res.json(result);
   } catch (err) { next(err); }
 });
 
-router.post('/', requireAuth, validateRequest({ body: createVenueBody }), async (req, res, next) => {
+router.post('/', requireAuth, async (req, res, next) => {
   try {
-    const result = await venueService.createVenue(req.body, req.user!.id);
+    const body = createVenueBody.parse(req.body);
+    const result = await venueService.createVenue(body, req.user!.id);
     res.status(201).json({ data: result });
   } catch (err) { next(err); }
 });
 
-router.get('/:venueId', validateRequest({ params: venueIdParam }), async (req, res, next) => {
+router.get('/:venueId', async (req, res, next) => {
   try {
-    const result = await venueService.getVenue(Number(req.params.venueId));
+    const { venueId } = venueIdParam.parse(req.params);
+    const result = await venueService.getVenue(venueId);
     res.json({ data: result });
   } catch (err) { next(err); }
 });

@@ -124,7 +124,7 @@ describe('Venue routes', () => {
       expect(res.body.data.id).toBe(5);
     });
 
-    it('should return 422 with auth and invalid body', async () => {
+    it('should return 400 with auth and invalid body', async () => {
       const token = generateTestToken();
 
       const res = await request
@@ -132,7 +132,7 @@ describe('Venue routes', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ name: 'Missing fields' });
 
-      expect(res.status).toBe(422);
+      expect(res.status).toBe(400);
     });
   });
 });

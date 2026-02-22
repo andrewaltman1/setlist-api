@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import { ZodError } from 'zod';
 import { AppError } from '../utils/errors.ts';
 import { config } from '../config/index.ts';
 
@@ -9,6 +10,13 @@ export const errorHandler = (
   _next: NextFunction,
 ) => {
   console.error('Error:', err);
+
+  if (err instanceof ZodError) {
+    const message = err.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join('; ');
+    return res.status(400).json({
+      error: { message, code: 'BAD_REQUEST' },
+    });
+  }
 
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({

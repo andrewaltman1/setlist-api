@@ -4,6 +4,7 @@ process.env.NODE_ENV = 'test';
 
 import { errorHandler } from '../../../src/middleware/errorHandler.ts';
 import { NotFoundError, ValidationError, UnauthorizedError, BadRequestError } from '../../../src/utils/errors.ts';
+import { ZodError } from 'zod';
 import type { Request, Response, NextFunction } from 'express';
 
 function createMocks() {
@@ -71,6 +72,20 @@ describe('errorHandler middleware', () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({
       error: { message: 'Bad input', code: 'BAD_REQUEST' },
+    });
+  });
+
+  it('should handle ZodError with 400', () => {
+    const { req, res, next } = createMocks();
+    const err = new ZodError([
+      { code: 'too_small', minimum: 1, type: 'number', inclusive: true, exact: false, message: 'Number must be greater than or equal to 1', path: ['limit'] },
+    ]);
+
+    errorHandler(err, req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: { message: 'limit: Number must be greater than or equal to 1', code: 'BAD_REQUEST' },
     });
   });
 

@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { requireAuth } from '../../middleware/auth.ts';
-import { validateRequest } from '../../middleware/validateRequest.ts';
 import * as showService from '../../services/showService.ts';
 import { z } from 'zod';
 
@@ -36,23 +35,26 @@ const showIdParam = z.object({
 });
 
 // Routes
-router.get('/', validateRequest({ query: listShowsQuery }), async (req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
-    const result = await showService.listShows(req.query as any);
+    const query = listShowsQuery.parse(req.query);
+    const result = await showService.listShows(query);
     res.json(result);
   } catch (err) { next(err); }
 });
 
-router.post('/', requireAuth, validateRequest({ body: createShowBody }), async (req, res, next) => {
+router.post('/', requireAuth, async (req, res, next) => {
   try {
-    const result = await showService.createShow(req.body, req.user!.id);
+    const body = createShowBody.parse(req.body);
+    const result = await showService.createShow(body, req.user!.id);
     res.status(201).json({ data: result });
   } catch (err) { next(err); }
 });
 
-router.get('/:showId', validateRequest({ params: showIdParam }), async (req, res, next) => {
+router.get('/:showId', async (req, res, next) => {
   try {
-    const result = await showService.getShow(Number(req.params.showId));
+    const { showId } = showIdParam.parse(req.params);
+    const result = await showService.getShow(showId);
     res.json({ data: result });
   } catch (err) { next(err); }
 });
