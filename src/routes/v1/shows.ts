@@ -35,28 +35,22 @@ const showIdParam = z.object({
 });
 
 // Routes
-router.get('/', async (req, res, next) => {
-  try {
-    const query = listShowsQuery.parse(req.query);
-    const result = await showService.listShows(query);
-    res.json(result);
-  } catch (err) { next(err); }
+router.get('/', async (req, res) => {
+  const query = listShowsQuery.parse(req.query);
+  const result = await showService.listShows(query);
+  res.json(result);
 });
 
-router.post('/', requireAuth, async (req, res, next) => {
-  try {
-    const body = createShowBody.parse(req.body);
-    const result = await showService.createShow(body, req.user!.id);
-    res.status(201).json({ data: result });
-  } catch (err) { next(err); }
+router.post('/', requireAuth, async (req, res) => {
+  const body = createShowBody.parse(req.body);
+  const result = await showService.createShow(body, req.user!.id);
+  res.status(201).json({ data: result });
 });
 
-router.get('/:showId', async (req, res, next) => {
-  try {
-    const { showId } = showIdParam.parse(req.params);
-    const result = await showService.getShow(showId);
-    res.json({ data: result });
-  } catch (err) { next(err); }
+router.get('/:showId', async (req, res) => {
+  const { showId } = showIdParam.parse(req.params);
+  const result = await showService.getShow(showId);
+  res.json({ data: result });
 });
 
 export default router;

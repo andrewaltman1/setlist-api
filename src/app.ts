@@ -19,7 +19,7 @@ app.use((req, res, next) => {
 app.use('/v1', v1Router);
 
 // 404 catch-all
-app.use('*', (req, res, next) => {
+app.use('*splat', (req, res, next) => {
   next(new AppError('Not Found', 404, 'NOT_FOUND'));
 });
 

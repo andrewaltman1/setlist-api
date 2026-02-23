@@ -28,28 +28,22 @@ export const createVenueBody = z.object({
 });
 
 // Routes
-router.get('/', async (req, res, next) => {
-  try {
-    const query = listVenuesQuery.parse(req.query);
-    const result = await venueService.listVenues(query);
-    res.json(result);
-  } catch (err) { next(err); }
+router.get('/', async (req, res) => {
+  const query = listVenuesQuery.parse(req.query);
+  const result = await venueService.listVenues(query);
+  res.json(result);
 });
 
-router.post('/', requireAuth, async (req, res, next) => {
-  try {
-    const body = createVenueBody.parse(req.body);
-    const result = await venueService.createVenue(body, req.user!.id);
-    res.status(201).json({ data: result });
-  } catch (err) { next(err); }
+router.post('/', requireAuth, async (req, res) => {
+  const body = createVenueBody.parse(req.body);
+  const result = await venueService.createVenue(body, req.user!.id);
+  res.status(201).json({ data: result });
 });
 
-router.get('/:venueId', async (req, res, next) => {
-  try {
-    const { venueId } = venueIdParam.parse(req.params);
-    const result = await venueService.getVenue(venueId);
-    res.json({ data: result });
-  } catch (err) { next(err); }
+router.get('/:venueId', async (req, res) => {
+  const { venueId } = venueIdParam.parse(req.params);
+  const result = await venueService.getVenue(venueId);
+  res.json({ data: result });
 });
 
 export default router;

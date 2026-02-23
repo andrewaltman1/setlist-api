@@ -23,30 +23,24 @@ const lookupSongsBody = z.object({
 });
 
 // Routes
-router.get('/', async (req, res, next) => {
-  try {
-    const query = listSongsQuery.parse(req.query);
-    const result = await songService.listSongs(query);
-    res.json(result);
-  } catch (err) { next(err); }
+router.get('/', async (req, res) => {
+  const query = listSongsQuery.parse(req.query);
+  const result = await songService.listSongs(query);
+  res.json(result);
 });
 
 // IMPORTANT: POST /lookup must be defined BEFORE GET /:songId
 // so that 'lookup' is not parsed as a songId parameter
-router.post('/lookup', requireAuth, async (req, res, next) => {
-  try {
-    const { titles } = lookupSongsBody.parse(req.body);
-    const result = await songService.lookupSongs(titles);
-    res.json({ data: result });
-  } catch (err) { next(err); }
+router.post('/lookup', requireAuth, async (req, res) => {
+  const { titles } = lookupSongsBody.parse(req.body);
+  const result = await songService.lookupSongs(titles);
+  res.json({ data: result });
 });
 
-router.get('/:songId', async (req, res, next) => {
-  try {
-    const { songId } = songIdParam.parse(req.params);
-    const result = await songService.getSong(songId);
-    res.json({ data: result });
-  } catch (err) { next(err); }
+router.get('/:songId', async (req, res) => {
+  const { songId } = songIdParam.parse(req.params);
+  const result = await songService.getSong(songId);
+  res.json({ data: result });
 });
 
 export default router;
